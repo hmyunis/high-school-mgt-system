@@ -13,6 +13,10 @@ import { HeroUIProvider } from '@heroui/react';
 import { ProtectedRoute } from './components/auth/ProtectedRoute.jsx';
 import Profile from './pages/Profile.jsx';
 import UserManagementPage from './pages/UserManagement.jsx';
+import ProfileManagementPage from './pages/ProfileManagement.jsx';
+import CourseManagementPage from './pages/CourseManagement.jsx';
+import AdminDashboard from './pages/AdminDashboard.jsx';
+import Dashboard from './pages/Dashboard.jsx';
 
 const router = createBrowserRouter([
     {
@@ -31,7 +35,17 @@ const router = createBrowserRouter([
                 index: true,
                 element: (
                     <ProtectedRoute>
-                        <div className="text-7xl font-light p-8">Dashboard</div>
+                        <Dashboard />
+                    </ProtectedRoute>
+                ),
+            },
+
+            // Admin pages
+            {
+                path: 'admin',
+                element: (
+                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                        <AdminDashboard />
                     </ProtectedRoute>
                 ),
             },
@@ -39,7 +53,23 @@ const router = createBrowserRouter([
                 path: 'users',
                 element: (
                     <ProtectedRoute allowedRoles={['ADMIN']}>
-                       <UserManagementPage />
+                        <UserManagementPage />
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: 'courses',
+                element: (
+                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                        <CourseManagementPage />
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: 'user/profiles',
+                element: (
+                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                        <ProfileManagementPage />
                     </ProtectedRoute>
                 ),
             },
@@ -51,14 +81,27 @@ const router = createBrowserRouter([
                     </ProtectedRoute>
                 ),
             },
+
+            // Teacher pages
             {
-                path: 'setting',
+                path: 'teacher',
                 element: (
                     <ProtectedRoute allowedRoles={['TEACHER']}>
-                        <div className="text-7xl font-light p-8">Setting</div>,
+                        <div>Teacher's Dashboard</div>
                     </ProtectedRoute>
                 ),
             },
+            
+            // Student pages
+            {
+                path: 'student',
+                element: (
+                    <ProtectedRoute allowedRoles={['STUDENT']}>
+                        <div>Student's Dashboard</div>
+                    </ProtectedRoute>
+                ),
+            },
+
         ],
     },
     {

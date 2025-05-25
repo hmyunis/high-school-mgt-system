@@ -123,7 +123,7 @@ const Header = ({ toggleSidebar }) => {
                 <Avatar
                   name={getUserName()}
                   size="sm"
-                  className="ring-2 ring-blue-500"
+                  className="ring-2 ring-blue-500 cursor-pointer"
                 />
               </DropdownTrigger>
               <DropdownMenu aria-label="User menu" className="w-56">

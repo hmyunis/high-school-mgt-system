@@ -7,6 +7,9 @@ const { seedAdmin } = require('./controllers/authController');
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const courseRoutes = require('./routes/courseRoutes');
+const studentRoutes = require('./routes/studentRoutes');
+const teacherRoutes = require('./routes/teacherRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,6 +40,9 @@ app.use(express.urlencoded({ extended: true }));
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/courses', courseRoutes);
+app.use('/api', studentRoutes);
+app.use('/api', teacherRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {

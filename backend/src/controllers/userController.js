@@ -11,20 +11,49 @@ const ROLES = {
 
 const getAllUsers = async (req, res) => {
     const includeArchived = req.query.includeArchived === 'true';
+    const roleFilter = req.query.role;
 
-    const baseQueryOptions = {
-        include: [
-            { model: Student, as: 'studentProfile' },
-            { model: Teacher, as: 'teacherProfile' },
-        ],
-    };
+    const baseIncludeOptions = [
+        { model: Student, as: 'studentProfile' },
+        { model: Teacher, as: 'teacherProfile' },
+    ];
+
+    // Construct the 'where' clause for Sequelize
+    let whereClause = {};
+
+    // Role filtering
+    if (roleFilter) {
+        // Validate roleFilter if necessary (e.g., ensure it's one of 'ADMIN', 'TEACHER', 'STUDENT')
+        const validRoles = ['ADMIN', 'TEACHER', 'STUDENT'];
+        if (validRoles.includes(roleFilter.toUpperCase())) {
+            whereClause.role = roleFilter.toUpperCase();
+        } else {
+            console.warn(`Invalid role filter received: ${roleFilter}. Ignoring.`);
+            return res.status(400).json({ message: 'Invalid role filter provided.' });
+        }
+    }
 
     try {
         let users;
+        let queryOptions = {
+            include: baseIncludeOptions,
+            order: [['fullName', 'ASC']],
+        };
+
         if (includeArchived) {
-            users = await User.scope('all').findAll(baseQueryOptions);
+            // Use 'all' scope to include archived, then add our dynamic whereClause
+            // The 'all' scope has 'where: {}', so our whereClause will be applied.
+            queryOptions.where = whereClause; // Add our dynamic where clause
+            users = await User.scope('all').findAll(queryOptions);
         } else {
-            users = await User.findAll(baseQueryOptions);
+            // Default scope already filters for `isArchived: false`.
+            // We need to merge our dynamic whereClause with the default scope's where.
+            // The default scope's `where: { isArchived: false }` will be automatically merged
+            // with our `whereClause` by Sequelize if they don't conflict on the same key.
+            // If `whereClause` is empty, only `isArchived: false` applies.
+            // If `whereClause` has `role`, it becomes `{ isArchived: false, role: '...' }`.
+            queryOptions.where = whereClause;
+            users = await User.findAll(queryOptions);
         }
 
         res.json({ message: 'Users retrieved successfully', data: users });

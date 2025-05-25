@@ -1,9 +1,18 @@
 import { makeApiRequest } from './apiClient';
 
 export const userService = {
-    getAllUsers: (includeArchived) => {
-        const params = includeArchived ? '?includeArchived=true' : '';
-        return makeApiRequest(`/users${params}`);
+    getAllUsers: (includeArchived, role = null) => {
+        const params = new URLSearchParams();
+
+        if (includeArchived) {
+            params.append('includeArchived', 'true');
+        }
+        if (role) {
+            params.append('role', role);
+        }
+
+        const queryString = params.toString();
+        return makeApiRequest(`/users${queryString ? `?${queryString}` : ''}`);
     },
 
     getUserById: (userId) => {

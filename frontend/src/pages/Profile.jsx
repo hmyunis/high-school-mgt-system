@@ -7,17 +7,11 @@ import { toast } from 'sonner';
 import { Input } from '@heroui/input';
 import { Button } from '@heroui/button';
 import { Card, CardHeader, CardBody, CardFooter } from '@heroui/card';
+import { DatePicker } from '@heroui/react';
+import { parseDate } from "@internationalized/date";
 
 import {
-    User,
-    Mail,
-    Phone,
-    CalendarDays,
-    KeyRound,
-    ShieldCheck,
-    Save,
-    Loader2,
-    Info,
+    User, Mail, Phone, CalendarDays, KeyRound, ShieldCheck, Save, Loader2, Info, Settings
 } from 'lucide-react';
 
 const SimpleSpinner = () => (
@@ -30,12 +24,13 @@ const Profile = () => {
     const { user } = useAuth();
     const queryClient = useQueryClient();
 
+    // Store dateOfBirth as "YYYY-MM-DD" string or null in formData
     const [formData, setFormData] = useState({
         fullName: '',
         username: '',
         email: '',
         phone: '',
-        dateOfBirth: '',
+        dateOfBirth: null, // "YYYY-MM-DD" string or null
         gender: '',
         password: '',
         currentPassword: '',
@@ -64,7 +59,7 @@ const Profile = () => {
                 username: username || '',
                 email: email || '',
                 phone: phone || '',
-                dateOfBirth: dateOfBirth ? dateOfBirth.slice(0, 10) : '',
+                dateOfBirth: dateOfBirth || null, // API provides "YYYY-MM-DD" string
                 gender: gender || '',
                 password: '',
                 currentPassword: '',
@@ -75,7 +70,7 @@ const Profile = () => {
     const updateUserMutation = useMutation({
         mutationFn: (updatedData) => userService.updateUser(user?.id, updatedData),
         onSuccess: (data) => {
-            queryClient.invalidateQueries(['profile', user?.id]);
+            queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });
             toast.success(data?.message || 'Profile updated successfully!');
             setFormData((prev) => ({ ...prev, password: '', currentPassword: '' }));
         },
@@ -94,8 +89,18 @@ const Profile = () => {
         }));
     };
 
+    // DatePicker's onChange provides a CalendarDate object
+    const handleDateChange = (calendarDate) => {
+        // Convert CalendarDate object to "YYYY-MM-DD" string for formData
+        setFormData((prev) => ({
+            ...prev,
+            dateOfBirth: calendarDate ? calendarDate.toString() : null,
+        }));
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
+        // formData.dateOfBirth is already in "YYYY-MM-DD" string format or null
         const dataToSubmit = { ...formData };
 
         if (!dataToSubmit.password) {
@@ -115,6 +120,7 @@ const Profile = () => {
             </div>
         );
     }
+
     if (isProfileError || !profileData?.data) {
         return (
             <div className="flex flex-col justify-center items-center min-h-[calc(100vh-200px)] text-red-600 px-4">
@@ -125,31 +131,35 @@ const Profile = () => {
         );
     }
 
+    // For DatePicker value prop, convert the string from formData to CalendarDate object
+    const datePickerValue = formData.dateOfBirth ? parseDate(formData.dateOfBirth) : null;
+
     return (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <Card className="w-full max-w-4xl mx-auto shadow-lg border border-blue-300">
-                <CardHeader className="flex flex-col items-start pl-8 pt-8">
-                    <div className="flex items-center">
-                        <User className="w-7 h-7 text-blue-600 mr-3" />
-                        <h2 className="text-2xl font-bold text-blue-700">Manage Profile</h2>
-                    </div>
+        <div className="p-4 md:p-6 lg:p-8">
+            <header className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-800 flex items-center">
+                    <Settings className="mr-3 text-blue-600" />
+                    My Profile
+                </h1>
+                <p className="text-gray-500">View and update your personal details.</p>
+            </header>
+
+            <Card className="shadow-xl border border-gray-200 rounded-xl">
+                <CardHeader className="flex flex-col items-start p-6 border-b border-gray-200">
+                    <h2 className="text-xl font-semibold text-gray-700">Profile Information</h2>
                     <p className="text-sm text-gray-500 mt-1">
-                        Update your personal information and password.
+                        Keep your personal information up to date.
                     </p>
                 </CardHeader>
                 <form onSubmit={handleSubmit}>
-                    <CardBody className="py-6 px-6 sm:px-8 space-y-6">
-                        <h3 className="text-lg font-semibold text-blue-600 border-b border-blue-200 pb-2 mb-4">
-                            Personal Information
-                        </h3>
+                    <CardBody className="p-6 space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-                            {/* Full Name */}
                             <div>
                                 <label
                                     htmlFor="fullName"
-                                    className="text-sm font-medium text-blue-700 flex items-center gap-2 mb-1"
+                                    className="text-sm font-medium text-gray-700 mb-1 flex items-center"
                                 >
-                                    <User className="w-4 h-4" /> Full Name
+                                    <User className="w-4 h-4 mr-2 text-gray-500" /> Full Name
                                 </label>
                                 <Input
                                     id="fullName"
@@ -163,13 +173,12 @@ const Profile = () => {
                                 />
                             </div>
 
-                            {/* Username */}
                             <div>
                                 <label
                                     htmlFor="username"
-                                    className="text-sm font-medium text-blue-700 flex items-center gap-2 mb-1"
+                                    className="text-sm font-medium text-gray-700 mb-1 flex items-center"
                                 >
-                                    <User className="w-4 h-4" /> Username
+                                    <User className="w-4 h-4 mr-2 text-gray-500" /> Username
                                 </label>
                                 <Input
                                     id="username"
@@ -183,13 +192,12 @@ const Profile = () => {
                                 />
                             </div>
 
-                            {/* Email */}
                             <div>
                                 <label
                                     htmlFor="email"
-                                    className="text-sm font-medium text-blue-700 flex items-center gap-2 mb-1"
+                                    className="text-sm font-medium text-gray-700 mb-1 flex items-center"
                                 >
-                                    <Mail className="w-4 h-4" /> Email Address
+                                    <Mail className="w-4 h-4 mr-2 text-gray-500" /> Email Address
                                 </label>
                                 <Input
                                     id="email"
@@ -203,19 +211,18 @@ const Profile = () => {
                                 />
                             </div>
 
-                            {/* Phone */}
                             <div>
                                 <label
                                     htmlFor="phone"
-                                    className="text-sm font-medium text-blue-700 flex items-center gap-2 mb-1"
+                                    className="text-sm font-medium text-gray-700 mb-1 flex items-center"
                                 >
-                                    <Phone className="w-4 h-4" /> Phone Number
+                                    <Phone className="w-4 h-4 mr-2 text-gray-500" /> Phone Number
                                 </label>
                                 <Input
                                     id="phone"
                                     name="phone"
                                     type="tel"
-                                    placeholder="+251 912 345 678"
+                                    placeholder="+1 234 567 890"
                                     value={formData.phone || ''}
                                     onChange={handleChange}
                                     disabled={updateUserMutation.isLoading}
@@ -223,92 +230,91 @@ const Profile = () => {
                                 />
                             </div>
 
-                            {/* Date of Birth */}
                             <div>
                                 <label
-                                    htmlFor="dateOfBirth"
-                                    className="text-sm font-medium text-blue-700 flex items-center gap-2 mb-1"
+                                    className="text-sm font-medium text-gray-700 mb-1 flex items-center"
                                 >
-                                    <CalendarDays className="w-4 h-4" /> Date of Birth
+                                    <CalendarDays className="w-4 h-4 mr-2 text-gray-500" /> Date of Birth
                                 </label>
-                                <Input
-                                    id="dateOfBirth"
-                                    name="dateOfBirth"
-                                    type="date"
-                                    value={formData.dateOfBirth}
-                                    onChange={handleChange}
-                                    disabled={updateUserMutation.isLoading}
-                                    className="mt-1"
+                                <DatePicker
+                                    aria-label="Date of Birth"
+                                    value={datePickerValue}
+                                    onChange={handleDateChange}
+                                    className="w-full mt-1"
+                                    granularity="day"
+                                    isDisabled={updateUserMutation.isLoading}
                                 />
                             </div>
 
-                            {/* Gender */}
                             <div>
                                 <label
                                     htmlFor="gender"
-                                    className="text-sm font-medium text-blue-700 flex items-center gap-2 mb-1"
+                                    className="text-sm font-medium text-gray-700 mb-1 flex items-center"
                                 >
-                                    <User className="w-4 h-4" /> Gender
+                                    <User className="w-4 h-4 mr-2 text-gray-500" /> Gender
                                 </label>
                                 <Input
+                                    id="gender"
                                     name="gender"
                                     value={formData.gender}
-                                    disabled
-                                    className="w-full mt-1"
+                                    readOnly
+                                    className="w-full mt-1 bg-gray-100 border-gray-300 cursor-not-allowed"
                                 />
                             </div>
                         </div>
 
-                        {/* Role - Display Only */}
-                        <div className="mt-6">
-                            <label className="text-sm font-medium text-blue-700 flex items-center gap-2 mb-1">
-                                <ShieldCheck className="w-4 h-4" /> Your Role
-                            </label>
-                            <Input
-                                type="text"
-                                value={profileData?.data?.role || 'N/A'}
-                                readOnly
-                                className="mt-1 bg-gray-100 cursor-not-allowed border-gray-300"
-                            />
-                            <p className="text-xs text-gray-500 mt-1 flex items-center">
-                                <Info size={12} className="mr-1 text-blue-500" /> Your role is
-                                assigned by an administrator and cannot be changed here.
-                            </p>
+                        <div className="mt-6 pt-6 border-t border-gray-200">
+                             <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                                Account Information
+                            </h3>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                    <ShieldCheck className="w-4 h-4 mr-2 text-gray-500" /> Your Role
+                                </label>
+                                <Input
+                                    type="text"
+                                    value={profileData?.data?.role || 'N/A'}
+                                    readOnly
+                                    className="mt-1 bg-gray-100 cursor-not-allowed border-gray-300"
+                                />
+                                <p className="text-xs text-gray-500 mt-1 flex items-center">
+                                    <Info size={12} className="mr-1 text-blue-500" /> Role is assigned by administration.
+                                </p>
+                            </div>
                         </div>
 
-                        {/* Password Section */}
-                        <div className="mt-8 pt-6 border-t border-blue-200">
-                            <h3 className="text-lg font-semibold text-blue-600 pb-2 mb-4">
-                                Change Password
+                        <div className="mt-6 pt-6 border-t border-gray-200">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                                Security Settings
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                                 <div>
                                     <label
                                         htmlFor="currentPassword"
-                                        className="text-sm font-medium text-blue-700 flex items-center gap-2 mb-1"
+                                        className="text-sm font-medium text-gray-700 mb-1 flex items-center"
                                     >
-                                        <KeyRound className="w-4 h-4" /> Current Password
+                                        <KeyRound className="w-4 h-4 mr-2 text-gray-500" /> Current Password
                                     </label>
                                     <Input
                                         id="currentPassword"
                                         name="currentPassword"
                                         type="password"
-                                        placeholder="Required for password change"
+                                        placeholder="Required to change password"
                                         value={formData.currentPassword}
                                         onChange={handleChange}
                                         disabled={updateUserMutation.isLoading}
                                         className="mt-1"
                                     />
                                     <p className="text-xs text-gray-500 mt-1">
-                                        Only required if you want to change your password.
+                                        Enter if you are changing your password.
                                     </p>
                                 </div>
                                 <div>
                                     <label
                                         htmlFor="password"
-                                        className="text-sm font-medium text-blue-700 flex items-center gap-2 mb-1"
+                                        className="text-sm font-medium text-gray-700 mb-1 flex items-center"
                                     >
-                                        <KeyRound className="w-4 h-4" /> New Password
+                                        <KeyRound className="w-4 h-4 mr-2 text-gray-500" /> New Password
                                     </label>
                                     <Input
                                         id="password"
@@ -320,24 +326,27 @@ const Profile = () => {
                                         disabled={updateUserMutation.isLoading}
                                         className="mt-1"
                                     />
+                                     <p className="text-xs text-gray-500 mt-1">
+                                        Minimum 8 characters recommended.
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </CardBody>
-                    <CardFooter className="border-t border-blue-200 pt-6 px-6 sm:px-8 flex justify-end">
+                    <CardFooter className="p-6 border-t border-gray-200 flex justify-end bg-gray-50 rounded-b-xl">
                         <Button
                             type="submit"
-                            className="bg-blue-600 hover:bg-blue-700 text-white min-w-[120px]"
+                            className="bg-blue-600 hover:bg-blue-700 text-white min-w-[140px] px-6 py-2.5"
                             disabled={updateUserMutation.isLoading}
                         >
                             {updateUserMutation.isLoading ? (
                                 <span className="flex items-center justify-center">
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                                     Saving...
                                 </span>
                             ) : (
                                 <span className="flex items-center justify-center">
-                                    <Save className="mr-2 h-4 w-4" />
+                                    <Save className="mr-2 h-5 w-5" />
                                     Save Changes
                                 </span>
                             )}

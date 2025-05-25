@@ -1,5 +1,3 @@
-// src/components/layout/Sidebar.jsx
-
 import { NavLink } from 'react-router-dom';
 import {
   Home,
@@ -19,11 +17,11 @@ import clsx from 'clsx';
 
 const sidebarConfig = {
   ADMIN: [
-    { label: 'Dashboard', icon: <Home className="size-5" />, to: '/admin' },
+    { label: 'Dashboard', icon: <Home className="size-5" />, to: '/dashboard/admin' },
     { label: 'User Management', icon: <Users className="size-5" />, to: '/dashboard/users' },
-    { label: 'Course Management', icon: <BookOpen className="size-5" />, to: '/admin/courses' },
-    { label: 'Assessments', icon: <FileText className="size-5" />, to: '/admin/assessments' },
-    { label: 'Academic Settings', icon: <Settings className="size-5" />, to: '/admin/settings' },
+    { label: 'Course Management', icon: <BookOpen className="size-5" />, to: '/dashboard/courses' },
+    // { label: 'Assessments', icon: <FileText className="size-5" />, to: '/admin/assessments' },
+    { label: 'Manage Profiles', icon: <Settings className="size-5" />, to: '/dashboard/user/profiles' },
     { label: 'My Profile', icon: <GraduationCap className="size-5" />, to: '/dashboard/profile' },
     { label: 'Logout', icon: <LogOut className="size-5" />, to: '/logout' },
   ],
@@ -46,7 +44,7 @@ const sidebarConfig = {
 };
 
 export function Sidebar({ isCollapsed, setIsCollapsed }) {
-  const { role } = useAuth();
+  const { role, logout } = useAuth();
   const links = sidebarConfig[role] || [];
 
   return (
@@ -76,22 +74,40 @@ export function Sidebar({ isCollapsed, setIsCollapsed }) {
       </div>
 
       <nav className="flex-1 px-1 py-4 space-y-1 overflow-y-auto">
-        {links.map(({ label, to, icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              clsx(
-                'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors',
-                isActive ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100',
-                isCollapsed && 'justify-center px-2'
-              )
-            }
-          >
-            {icon}
-            {!isCollapsed && <span>{label}</span>}
-          </NavLink>
-        ))}
+        {links.map(({ label, to, icon }) => {
+          if (label === 'Logout') {
+            return (
+              <div
+                key={to}
+                onClick={logout}
+                className={clsx(
+                  'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer',
+                  'text-red-700 hover:bg-red-100',
+                  isCollapsed && 'justify-center px-2'
+                )}
+              >
+                {icon}
+                {!isCollapsed && <span>{label}</span>}
+              </div>
+            );
+          }
+          return (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                clsx(
+                  'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                  isActive ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100',
+                  isCollapsed && 'justify-center px-2'
+                )
+              }
+            >
+              {icon}
+              {!isCollapsed && <span>{label}</span>}
+            </NavLink>
+          );
+        })}
       </nav>
     </aside>
   );
