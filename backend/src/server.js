@@ -3,8 +3,10 @@ require('dotenv').config();
 const express = require('express');
 const db = require('./models');
 const cors = require('cors');
-const authRoutes = require('./routes/authRoutes');
 const { seedAdmin } = require('./controllers/authController');
+
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,7 +15,6 @@ const allowedOrigins = ['http://localhost:5173'];
 
 const corsOptions = {
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
         if (allowedOrigins.indexOf(origin) === -1) {
             const msg =
@@ -22,31 +23,20 @@ const corsOptions = {
         }
         return callback(null, true);
     },
-    credentials: true, // If you need to allow cookies or authorization headers
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Allowed methods
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'], // Allowed headers
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 
 // Middleware
-// app.use(cors()); // Enable CORS for all routes
+// app.use(cors());
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // API Routes
 app.use('/api/auth', authRoutes);
-
-// Example of a simple protected route
-const { protect, authorize } = require('./middlewares/authMiddleware');
-app.get('/api/admin-only', protect, authorize('ADMIN'), (req, res) => {
-    res.json({ message: 'Welcome Admin! This is a protected admin area.', user: req.auth });
-});
-app.get('/api/teacher-area', protect, authorize('TEACHER', 'ADMIN'), (req, res) => {
-    res.json({ message: 'Welcome Teacher/Admin! This is the teacher area.', user: req.auth });
-});
-app.get('/api/student-info', protect, authorize('STUDENT', 'ADMIN'), (req, res) => {
-    res.json({ message: 'Welcome Student/Admin! This is your info area.', user: req.auth });
-});
+app.use('/api/users', userRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {
@@ -56,7 +46,7 @@ app.use((err, req, res, next) => {
 
 const startServer = async () => {
     try {
-        await db.sequelize.sync({ alter: true, force: true });
+        await db.sequelize.sync();
         console.log('Database synchronized successfully.');
 
         await seedAdmin();

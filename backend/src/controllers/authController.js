@@ -6,9 +6,9 @@ const seedAdmin = async () => {
     try {
         const existingAdmin = await User.findOne({ where: { role: 'ADMIN' } });
         if (!existingAdmin) {
-            const hashedPassword = await hashPassword('admin123'); // Choose a strong password
+            const hashedPassword = await hashPassword('hamdi123'); // Choose a strong password
             await User.create({
-                username: 'admin',
+                username: 'hmyunis',
                 password: hashedPassword,
                 fullName: 'Site Administrator',
                 email: 'admin@example.com',
@@ -31,7 +31,7 @@ const login = async (req, res) => {
     }
 
     try {
-        const user = await User.findOne({ where: { username } });
+        const user = await User.scope('withPassword').findOne({ where: { username } });
 
         if (!user || !user.isActive) {
             return res.status(401).json({ message: 'Invalid credentials or user inactive' });

@@ -3,7 +3,7 @@ import { Input } from '@heroui/input';
 import { Button } from '@heroui/button';
 import { Card, CardHeader, CardBody, CardFooter } from '@heroui/card';
 import { User, LockKeyhole } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 import { Navigate, useNavigate } from 'react-router-dom';
 

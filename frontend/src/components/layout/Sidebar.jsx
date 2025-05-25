@@ -19,12 +19,12 @@ import clsx from 'clsx';
 
 const sidebarConfig = {
   ADMIN: [
-    { label: 'Dashboard', icon: <Home className="size-5" />, to: '/admin/dashboard' },
-    { label: 'User Management', icon: <Users className="size-5" />, to: '/admin/users' },
+    { label: 'Dashboard', icon: <Home className="size-5" />, to: '/admin' },
+    { label: 'User Management', icon: <Users className="size-5" />, to: '/dashboard/users' },
     { label: 'Course Management', icon: <BookOpen className="size-5" />, to: '/admin/courses' },
     { label: 'Assessments', icon: <FileText className="size-5" />, to: '/admin/assessments' },
     { label: 'Academic Settings', icon: <Settings className="size-5" />, to: '/admin/settings' },
-    { label: 'My Profile', icon: <GraduationCap className="size-5" />, to: '/profile' },
+    { label: 'My Profile', icon: <GraduationCap className="size-5" />, to: '/dashboard/profile' },
     { label: 'Logout', icon: <LogOut className="size-5" />, to: '/logout' },
   ],
   TEACHER: [
@@ -32,7 +32,7 @@ const sidebarConfig = {
     { label: 'My Courses', icon: <BookOpen className="size-5" />, to: '/teacher/courses' },
     { label: 'Assessments', icon: <ClipboardList className="size-5" />, to: '/teacher/assessments' },
     { label: 'Students', icon: <Users className="size-5" />, to: '/teacher/students' },
-    { label: 'My Profile', icon: <GraduationCap className="size-5" />, to: '/profile' },
+    { label: 'My Profile', icon: <GraduationCap className="size-5" />, to: '/dashboard/profile' },
     { label: 'Logout', icon: <LogOut className="size-5" />, to: '/logout' },
   ],
   STUDENT: [
@@ -40,7 +40,7 @@ const sidebarConfig = {
     { label: 'My Courses', icon: <BookOpen className="size-5" />, to: '/student/courses' },
     { label: 'My Grades', icon: <FileText className="size-5" />, to: '/student/grades' },
     { label: 'My Attendance', icon: <ClipboardList className="size-5" />, to: '/student/attendance' },
-    { label: 'My Profile', icon: <GraduationCap className="size-5" />, to: '/profile' },
+    { label: 'My Profile', icon: <GraduationCap className="size-5" />, to: '/dashboard/profile' },
     { label: 'Logout', icon: <LogOut className="size-5" />, to: '/logout' },
   ],
 };

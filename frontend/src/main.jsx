@@ -7,10 +7,12 @@ import { Toaster as Sonner } from 'sonner';
 
 import './index.css';
 import App from './App.jsx';
-import Login from './components/pages/Login';
+import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { HeroUIProvider } from '@heroui/react';
 import { ProtectedRoute } from './components/auth/ProtectedRoute.jsx';
+import Profile from './pages/Profile.jsx';
+import UserManagementPage from './pages/UserManagement.jsx';
 
 const router = createBrowserRouter([
     {
@@ -29,7 +31,23 @@ const router = createBrowserRouter([
                 index: true,
                 element: (
                     <ProtectedRoute>
-                        <div className="text-7xl font-light p-8">Dashboard</div>,
+                        <div className="text-7xl font-light p-8">Dashboard</div>
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: 'users',
+                element: (
+                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                       <UserManagementPage />
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: 'profile',
+                element: (
+                    <ProtectedRoute>
+                        <Profile />
                     </ProtectedRoute>
                 ),
             },
