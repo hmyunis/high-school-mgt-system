@@ -10,6 +10,8 @@ const userRoutes = require('./routes/userRoutes');
 const courseRoutes = require('./routes/courseRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const teacherRoutes = require('./routes/teacherRoutes');
+const { courseAssessmentsRouter, assessmentsRouter } = require('./routes/assessmentRoutes'); 
+const studentAssessmentRoutes = require('./routes/studentAssessmentRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -41,8 +43,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
-app.use('/api', studentRoutes);
+
+app.use('/api/course/:courseId/assessments', courseAssessmentsRouter);
+app.use('/api/assessments', assessmentsRouter);
+app.use('/api/assessments/:assessmentId/scores', studentAssessmentRoutes);
+
 app.use('/api', teacherRoutes);
+app.use('/api', studentRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {

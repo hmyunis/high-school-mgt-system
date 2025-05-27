@@ -1,5 +1,5 @@
 const db = require('../models');
-const { Course, Teacher, User, CourseTeacher } = db;
+const { Course, Teacher, User, CourseTeacher, Student } = db;
 const { Op } = require('sequelize');
 
 // 1. Create a new Course
@@ -210,4 +210,67 @@ exports.removeTeacherFromCourse = async (req, res) => {
       console.error('Error removing teacher from course:', error);
       res.status(500).json({ message: 'Internal server error.' });
   }
+};
+
+// NEW FUNCTION: Get students related to a course
+// This is a simplified version. A real system might have explicit CourseEnrollment.
+// This version fetches all users with role STUDENT.
+// A more robust version would only fetch students truly enrolled or eligible.
+exports.getStudentsForCourse = async (req, res) => {
+    const { courseId } = req.params;
+    const loggedInUserId = req.user.id;
+
+    try {
+        // First, verify the teacher is assigned to this course to authorize access
+        const teacherProfile = await Teacher.findOne({ where: { user_id: loggedInUserId }});
+        if (!teacherProfile) {
+            return res.status(403).json({ message: "Forbidden: User is not a teacher." });
+        }
+
+        const course = await Course.findByPk(courseId);
+        if (!course) {
+            return res.status(404).json({ message: "Course not found." });
+        }
+
+        const isAssignedToCourse = await CourseTeacher.findOne({
+            where: { teacher_id: teacherProfile.id, course_id: courseId }
+        });
+        if (!isAssignedToCourse) {
+            return res.status(403).json({ message: "Forbidden: You are not assigned to this course." });
+        }
+
+
+        // Fetch all users who are students.
+        // This is a placeholder for a more specific "enrolled students" logic.
+        // In a real system, you'd query based on an enrollment table or other criteria
+        // linking students directly to this course.
+        const students = await User.findAll({
+            where: { role: 'STUDENT', isActive: true, isArchived: false }, // Only active, non-archived students
+            attributes: ['id', 'fullName', 'username', 'email'], // User details
+            include: [{
+                model: Student,
+                as: 'studentProfile', // Make sure this alias matches your User model
+                attributes: ['id', 'gradeLevel', 'section'], // Student profile PK (student.id) and other details
+                required: true // Ensures only users with a student profile are returned
+            }],
+            order: [['fullName', 'ASC']]
+        });
+
+        // Re-map to a structure the frontend might expect, especially ensuring Student.id is prominent
+        const responseData = students.map(user => ({
+            id: user.studentProfile.id, // This is Student.id (PK of Student table)
+            user_id: user.id,           // This is User.id
+            fullName: user.fullName,
+            username: user.username,
+            email: user.email,
+            gradeLevel: user.studentProfile.gradeLevel,
+            section: user.studentProfile.section,
+        }));
+
+        res.json({ message: `Students list for course ${courseId} retrieved.`, data: responseData });
+
+    } catch (error) {
+        console.error(`Error retrieving students for course ${courseId}:`, error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
 };

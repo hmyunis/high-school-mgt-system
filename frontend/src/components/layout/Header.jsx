@@ -145,10 +145,10 @@ const Header = ({ toggleSidebar }) => {
                   <DropdownItem
                     key="settings"
                     startContent={<Settings className="h-4 w-4 text-blue-700" />}
-                    onPress={() => navigate('/dashboard/setting')}
+                    onPress={() => navigate('/dashboard/profile')}
                     className="hover:bg-blue-50"
                   >
-                    Settings
+                    Profile
                   </DropdownItem>
                   <DropdownItem
                     key="logout"

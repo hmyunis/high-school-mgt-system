@@ -131,3 +131,42 @@ exports.deleteTeacherProfile = async (req, res) => {
         res.status(500).json({ message: 'Internal server error.' });
     }
 };
+
+// 5. Get Courses Assigned to the Logged-in Teacher
+exports.getTeacherAssignedCourses = async (req, res) => {
+    try {
+        // req.user should be populated by your 'protect' middleware
+        // It should contain the logged-in user's ID.
+        // We need to find the Teacher profile ID from the User ID.
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ message: "Authentication required." });
+        }
+
+        const teacherProfile = await Teacher.findOne({ where: { user_id: req.user.id } });
+
+        if (!teacherProfile) {
+            return res.status(404).json({ message: "Teacher profile not found for the logged-in user." });
+        }
+
+        // Fetch courses associated with this teacher
+        const teacherWithCourses = await Teacher.findByPk(teacherProfile.id, {
+            include: [{
+                model: Course,
+                as: 'coursesTaught', // Must match the alias in your Teacher model's association
+                attributes: ['id', 'name', 'code', 'createdAt'], // Add any other course fields you need
+                through: { attributes: [] } // Don't include junction table attributes
+            }],
+            attributes: ['id'] // We only need courses, not teacher details again here
+        });
+
+        if (!teacherWithCourses || !teacherWithCourses.coursesTaught) {
+            return res.json({ message: "No courses assigned or teacher not found.", data: [] });
+        }
+
+        res.json({ message: "Assigned courses retrieved successfully.", data: teacherWithCourses.coursesTaught });
+
+    } catch (error) {
+        console.error("Error fetching teacher's assigned courses:", error);
+        res.status(500).json({ message: "Internal server error." });
+    }
+};

@@ -17,6 +17,14 @@ import ProfileManagementPage from './pages/ProfileManagement.jsx';
 import CourseManagementPage from './pages/CourseManagement.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import MyCoursesPage from './pages/MyCourses.jsx';
+import TeacherAssessmentsPage from './pages/Assessments.jsx';
+import AssessmentScoresPage from './pages/AssessmentScores.jsx';
+import TeacherStudentsPage from './pages/Students.jsx';
+import TeacherDashboard from './pages/TeacherDashboard.jsx';
+import StudentMyCoursesPage from './pages/StudentMyCourses.jsx';
+import CourseAssessmentsListPage from './pages/CourseAssessmentsList.jsx';
+import StudentDashboard from './pages/StudentDashboard.jsx';
 
 const router = createBrowserRouter([
     {
@@ -87,21 +95,79 @@ const router = createBrowserRouter([
                 path: 'teacher',
                 element: (
                     <ProtectedRoute allowedRoles={['TEACHER']}>
-                        <div>Teacher's Dashboard</div>
+                        <TeacherDashboard />
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: 'my-courses',
+                element: (
+                    <ProtectedRoute allowedRoles={['TEACHER']}>
+                        <MyCoursesPage />
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: 'assessments',
+                children: [
+                    {
+                        path: 'courses/:courseId',
+                        element: (
+                            <ProtectedRoute allowedRoles={['TEACHER']}>
+                                <TeacherAssessmentsPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: ':assessmentId/courses/:courseId/scores',
+                        element: (
+                            <ProtectedRoute allowedRoles={['TEACHER']}>
+                                <AssessmentScoresPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                ],
+            },
+            {
+                path: 'students',
+                element: (
+                    <ProtectedRoute allowedRoles={['TEACHER']}>
+                        <TeacherStudentsPage />
                     </ProtectedRoute>
                 ),
             },
             
+
             // Student pages
             {
                 path: 'student',
                 element: (
                     <ProtectedRoute allowedRoles={['STUDENT']}>
-                        <div>Student's Dashboard</div>
+                        <StudentDashboard />
                     </ProtectedRoute>
                 ),
             },
-
+            {
+                path: 'mycourses',
+                children: [
+                    {
+                        path: '',
+                        element: (
+                            <ProtectedRoute allowedRoles={['STUDENT']}>
+                                <StudentMyCoursesPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: ':courseId/assessments',
+                        element: (
+                            <ProtectedRoute allowedRoles={['STUDENT']}>
+                                <CourseAssessmentsListPage />
+                            </ProtectedRoute>
+                        ),
+                    }
+                ],
+            },
         ],
     },
     {
